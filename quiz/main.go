@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -17,6 +16,7 @@ func main() {
 
 		csvReader := csv.NewReader(file)
 		if problems, err := csvReader.ReadAll(); err == nil {
+			var score int = 0
 			for _, problem := range problems {
 				reader := bufio.NewReader(os.Stdin)
 				fmt.Print(problem[0] + "= ")
@@ -24,14 +24,13 @@ func main() {
 				text, _ := reader.ReadString('\n')
 				text = strings.Replace(text, "\n", "", -1)
 
-				if number, err := strconv.Atoi(text); err == nil {
-					fmt.Printf("Input: %d", number)
-					fmt.Println("")
-					fmt.Printf("Answer: %s", problem[1])
-				} else {
-					fmt.Println("Enter a valid integer")
+				if text == problem[1] {
+					score++
 				}
 			}
+
+			fmt.Println("Test Complete!")
+			fmt.Printf("\nScore: %d/%d", score, len(problems))
 		} else {
 			fmt.Println("Error reading problems")
 		}
