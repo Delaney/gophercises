@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -16,6 +17,10 @@ type Question struct {
 }
 
 func main() {
+	var limit int
+	flag.IntVar(&limit, "t", 30, "Specify time limit for the quiz")
+	flag.Parse()
+
 	file, err := os.Open("problems.csv")
 	if err != nil {
 		log.Fatal("Error while reading the file", err)
@@ -39,7 +44,9 @@ func main() {
 		questions = append(questions, q)
 	}
 
-	score, err := askQuestions(questions, 2)
+	fmt.Printf("Limit: %d\n", limit)
+
+	score, err := askQuestions(questions, limit)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -47,7 +54,6 @@ func main() {
 
 	fmt.Println("\nTest Complete!")
 	fmt.Printf("\nScore: %d/%d", score, len(problems))
-
 }
 
 func askQuestions(questions []Question, limit int) (int, error) {
@@ -70,6 +76,7 @@ func askQuestions(questions []Question, limit int) (int, error) {
 	for _, question := range questions {
 		answer, err := askQuestion(question, timer.C, done)
 		if err != nil && answer == -1 {
+			fmt.Println(err)
 			return score, nil
 		}
 		score += answer
@@ -84,7 +91,7 @@ func askQuestion(problem Question, timer <-chan time.Time, done <-chan string) (
 	for {
 		select {
 		case <-timer:
-			return -1, fmt.Errorf("Time limit exceeded")
+			return -1, fmt.Errorf("\nTime limit exceeded")
 		case answer := <-done:
 			score := 0
 			if strings.Compare(problem.answer, answer) == 0 {
